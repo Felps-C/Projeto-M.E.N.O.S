@@ -1,4 +1,13 @@
 package com.example.M.E.N.O.S.controller;
+
+import com.example.M.E.N.O.S.model.Estudante;
+import com.example.M.E.N.O.S.service.EstudanteService;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+
+import java.util.List;
+
 @RestController
 @RequestMapping("/estudantes")
 public class EstudanteController {
