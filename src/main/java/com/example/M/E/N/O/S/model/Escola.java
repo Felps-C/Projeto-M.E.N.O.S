@@ -1,5 +1,7 @@
 package com.example.M.E.N.O.S.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,7 +15,6 @@ import java.io.Serializable;
 @Entity
 @Table(name="Escolas")
 public class Escola implements Serializable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,9 +24,15 @@ public class Escola implements Serializable {
 
     @NotBlank(message = "O e-mail é obrigatório colocar")
     @Email(message = "E-mail inválido")
+    @Column(unique = true)
     private String email;
+
+    // WRITE_ONLY: a senha pode ser recebida, mas nunca aparece nas respostas JSON.
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String senha;
+
     @NotBlank(message = "É obrigatório colocar o cnpj da escola")
+    @Column(unique = true)
     private String cnpj;
 
     public Escola(){
@@ -36,7 +43,6 @@ public class Escola implements Serializable {
         this.email = email;
         this.senha = senha;
         this.cnpj = cnpj;
-
     }
 
     public Long getId() {
@@ -79,13 +85,13 @@ public class Escola implements Serializable {
         this.cnpj = cnpj;
     }
 
+    // Sem a senha no toString, para ela não aparecer em logs.
     @Override
     public String toString() {
         return "Escola{" +
                 "id=" + id +
                 ", nome='" + nome + '\'' +
                 ", email='" + email + '\'' +
-                ", senha='" + senha + '\'' +
                 ", cnpj='" + cnpj + '\'' +
                 '}';
     }
