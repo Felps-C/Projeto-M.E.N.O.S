@@ -1,10 +1,11 @@
 package com.example.M.E.N.O.S.controller;
 
+import com.example.M.E.N.O.S.dto.EstudanteRequest;
 import com.example.M.E.N.O.S.model.Estudante;
 import com.example.M.E.N.O.S.service.EstudanteService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -18,9 +19,10 @@ public class EstudanteController {
         this.estudanteService = estudanteService;
     }
 
+    // Use ?escolaId=1 para listar só os estudantes de uma escola.
     @GetMapping
-    public List<Estudante> listar() {
-        return estudanteService.listarTodos();
+    public List<Estudante> listar(@RequestParam(required = false) Long escolaId) {
+        return estudanteService.listar(escolaId);
     }
 
     @GetMapping("/{id}")
@@ -30,13 +32,13 @@ public class EstudanteController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Estudante criar(@Valid @RequestBody Estudante estudante) {
-        return estudanteService.salvar(estudante);
+    public Estudante criar(@Valid @RequestBody EstudanteRequest request) {
+        return estudanteService.salvar(request);
     }
 
     @PutMapping("/{id}")
-    public Estudante atualizar(@PathVariable Long id, @Valid @RequestBody Estudante estudante) {
-        return estudanteService.atualizar(id, estudante);
+    public Estudante atualizar(@PathVariable Long id, @Valid @RequestBody EstudanteRequest request) {
+        return estudanteService.atualizar(id, request);
     }
 
     @DeleteMapping("/{id}")

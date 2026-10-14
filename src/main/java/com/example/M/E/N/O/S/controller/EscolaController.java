@@ -1,7 +1,9 @@
 package com.example.M.E.N.O.S.controller;
 
+import com.example.M.E.N.O.S.dto.EscolaRequest;
 import com.example.M.E.N.O.S.model.Escola;
 import com.example.M.E.N.O.S.service.EscolaService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,16 +31,13 @@ public class EscolaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Escola criar(@RequestBody Escola escola) {
-        return escolaService.salvar(escola);
+    public Escola criar(@Valid @RequestBody EscolaRequest request) {
+        return escolaService.salvar(request);
     }
 
     @PutMapping("/{id}")
-    public Escola atualizar(
-            @PathVariable Long id,
-            @RequestBody Escola escola) {
-
-        return escolaService.atualizar(id, escola);
+    public Escola atualizar(@PathVariable Long id, @Valid @RequestBody EscolaRequest request) {
+        return escolaService.atualizar(id, request);
     }
 
     @DeleteMapping("/{id}")

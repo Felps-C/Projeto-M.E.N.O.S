@@ -1,19 +1,31 @@
 package com.example.M.E.N.O.S.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+// Cardápio: conjunto de merendas publicado por uma escola.
 @Entity
 @Table
 public class Menu {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private LocalDate dataInicio;
+
     private Boolean ativa;
+
+    // Escola que publicou o cardápio. Não vai inteira no JSON (evita expor a senha);
+    // só o "escolaId", pelo getter abaixo.
+    @JsonIgnore
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "escola_id")
+    private Escola escola;
 
     @ManyToMany
     private List<Merenda> merendas = new ArrayList<>();
@@ -50,6 +62,19 @@ public class Menu {
 
     public void setAtiva(Boolean ativa) {
         this.ativa = ativa;
+    }
+
+    public Escola getEscola() {
+        return escola;
+    }
+
+    public void setEscola(Escola escola) {
+        this.escola = escola;
+    }
+
+    @JsonProperty("escolaId")
+    public Long getEscolaId() {
+        return escola != null ? escola.getId() : null;
     }
 
     public List<Merenda> getMerendas() {

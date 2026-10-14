@@ -40,6 +40,7 @@ public class ProdutoService {
         produto.setNome(dadosAtualizados.getNome());
         produto.setValidade(dadosAtualizados.getValidade());
         produto.setQuantidade(dadosAtualizados.getQuantidade());
+        produto.setEstoqueMinimo(dadosAtualizados.getEstoqueMinimo());
         return produtoRepository.save(produto);
     }
 
@@ -51,7 +52,7 @@ public class ProdutoService {
             produtoRepository.flush();
         } catch (DataIntegrityViolationException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "O produto está em uso (por exemplo, em uma lista de compras) e não pode ser excluído");
+                    "O produto está em uso (lista de compras ou histórico de movimentação) e não pode ser excluído");
         }
     }
 }

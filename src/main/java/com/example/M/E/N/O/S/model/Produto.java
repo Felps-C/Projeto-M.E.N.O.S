@@ -22,6 +22,10 @@ public class Produto implements Serializable {
     @PositiveOrZero(message = "A quantidade não pode ser negativa")
     private int quantidade;
 
+    // Quantidade mínima desejada em estoque (RF08). 0 = alerta desativado.
+    @PositiveOrZero(message = "O estoque mínimo não pode ser negativo")
+    private int estoqueMinimo;
+
     public Produto(){
     }
 
@@ -60,10 +64,16 @@ public class Produto implements Serializable {
         return quantidade;
     }
 
-    // CORRIGIDO: antes o parâmetro era "quantidadeDisponivel" e o código fazia
-    // this.quantidade = quantidade, ou seja, o valor nunca era gravado.
     public void setQuantidade(int quantidade) {
         this.quantidade = quantidade;
+    }
+
+    public int getEstoqueMinimo() {
+        return estoqueMinimo;
+    }
+
+    public void setEstoqueMinimo(int estoqueMinimo) {
+        this.estoqueMinimo = estoqueMinimo;
     }
 
     @Override
@@ -73,6 +83,7 @@ public class Produto implements Serializable {
                 ", nome='" + nome + '\'' +
                 ", validade=" + validade +
                 ", quantidade=" + quantidade +
+                ", estoqueMinimo=" + estoqueMinimo +
                 '}';
     }
 }
