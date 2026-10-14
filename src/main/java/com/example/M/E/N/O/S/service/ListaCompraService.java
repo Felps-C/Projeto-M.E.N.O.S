@@ -52,7 +52,7 @@ public class ListaCompraService {
     @Transactional(readOnly = true)
     public List<ListaCompra> listarPorEstoque(Long estoqueId) {
         buscarEstoque(estoqueId); // garante o 404 se o estoque não existir
-        return listaCompraRepository.findByEstoqueIdOrderByDataCriacaoDesc(estoqueId);
+        return listaCompraRepository.findByEstoque_IdOrderByDataCriacaoDesc(estoqueId);
     }
 
     @Transactional(readOnly = true)

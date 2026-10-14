@@ -34,7 +34,7 @@ public class EstudanteService {
         if (!escolaRepository.existsById(escolaId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Escola não encontrada com id: " + escolaId);
         }
-        return estudanteRepository.findByEscolaId(escolaId);
+        return estudanteRepository.findByEscola_Id(escolaId);
     }
 
     public Estudante buscarPorId(Long id) {
@@ -53,7 +53,7 @@ public class EstudanteService {
         estudanteRepository.findByEmail(request.email()).ifPresent(outro -> {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um estudante com este e-mail");
         });
-        estudanteRepository.findByEscolaIdAndMatriculaEscolar(escola.getId(), request.matriculaEscolar())
+        estudanteRepository.findByEscola_IdAndMatriculaEscolar(escola.getId(), request.matriculaEscolar())
                 .ifPresent(outro -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT,
                             "Já existe um estudante com esta matrícula nesta escola");
@@ -80,7 +80,7 @@ public class EstudanteService {
                 .ifPresent(outro -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um estudante com este e-mail");
                 });
-        estudanteRepository.findByEscolaIdAndMatriculaEscolar(escola.getId(), request.matriculaEscolar())
+        estudanteRepository.findByEscola_IdAndMatriculaEscolar(escola.getId(), request.matriculaEscolar())
                 .filter(outro -> !outro.getId().equals(id))
                 .ifPresent(outro -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT,

@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface EstoqueRepository extends JpaRepository<Estoque, Long> {
 
-    Optional<Estoque> findByEscolaId(Long escolaId);
+    Optional<Estoque> findByEscola_Id(Long escolaId);
 
-    boolean existsByEscolaId(Long escolaId);
+    boolean existsByEscola_Id(Long escolaId);
 }

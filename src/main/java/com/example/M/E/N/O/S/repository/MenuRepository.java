@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 
-    List<Menu> findByEscolaIdOrderByDataInicioDesc(Long escolaId);
+    List<Menu> findByEscola_IdOrderByDataInicioDesc(Long escolaId);
 
-    List<Menu> findByEscolaIdAndAtivaOrderByDataInicioDesc(Long escolaId, Boolean ativa);
+    List<Menu> findByEscola_IdAndAtivaOrderByDataInicioDesc(Long escolaId, Boolean ativa);
 }

@@ -53,9 +53,9 @@ public class MenuService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Escola não encontrada com id: " + escolaId);
         }
         if (ativa == null) {
-            return menuRepository.findByEscolaIdOrderByDataInicioDesc(escolaId);
+            return menuRepository.findByEscola_IdOrderByDataInicioDesc(escolaId);
         }
-        return menuRepository.findByEscolaIdAndAtivaOrderByDataInicioDesc(escolaId, ativa);
+        return menuRepository.findByEscola_IdAndAtivaOrderByDataInicioDesc(escolaId, ativa);
     }
 
     @Transactional(readOnly = true)

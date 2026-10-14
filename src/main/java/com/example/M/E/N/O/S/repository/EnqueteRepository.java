@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface EnqueteRepository extends JpaRepository<Enquete, Long> {
 
-    List<Enquete> findByEscolaIdOrderByDataInicioDesc(Long escolaId);
+    List<Enquete> findByEscola_IdOrderByDataInicioDesc(Long escolaId);
 
-    List<Enquete> findByEscolaIdAndAtivaOrderByDataInicioDesc(Long escolaId, Boolean ativa);
+    List<Enquete> findByEscola_IdAndAtivaOrderByDataInicioDesc(Long escolaId, Boolean ativa);
 }

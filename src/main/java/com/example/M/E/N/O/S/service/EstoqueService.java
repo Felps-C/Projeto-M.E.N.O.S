@@ -44,7 +44,7 @@ public class EstoqueService {
         Escola escola = escolaRepository.findById(escolaId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Escola não encontrada com id: " + escolaId));
-        if (estoqueRepository.existsByEscolaId(escolaId)) {
+        if (estoqueRepository.existsByEscola_Id(escolaId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Esta escola já possui um estoque");
         }
         return estoqueRepository.save(new Estoque(escola));
@@ -59,7 +59,7 @@ public class EstoqueService {
 
     @Transactional(readOnly = true)
     public Estoque buscarPorEscola(Long escolaId) {
-        return estoqueRepository.findByEscolaId(escolaId)
+        return estoqueRepository.findByEscola_Id(escolaId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "A escola " + escolaId + " ainda não possui estoque"));
     }

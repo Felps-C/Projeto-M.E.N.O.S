@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface ListaCompraRepository extends JpaRepository<ListaCompra, Long> {
 
-    List<ListaCompra> findByEstoqueIdOrderByDataCriacaoDesc(Long estoqueId);
+    List<ListaCompra> findByEstoque_IdOrderByDataCriacaoDesc(Long estoqueId);
 }

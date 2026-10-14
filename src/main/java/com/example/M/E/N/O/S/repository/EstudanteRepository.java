@@ -11,7 +11,7 @@ public interface EstudanteRepository extends JpaRepository<Estudante, Long> {
     Optional<Estudante> findByEmail(String email);
 
     // A matrícula só precisa ser única dentro da mesma escola.
-    Optional<Estudante> findByEscolaIdAndMatriculaEscolar(Long escolaId, String matriculaEscolar);
+    Optional<Estudante> findByEscola_IdAndMatriculaEscolar(Long escolaId, String matriculaEscolar);
 
-    List<Estudante> findByEscolaId(Long escolaId);
+    List<Estudante> findByEscola_Id(Long escolaId);
 }

@@ -1,26 +1,35 @@
 package com.example.M.E.N.O.S.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "Feedbacks")
-
 public class Feedback implements Serializable {
-
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank(message = "O texto do feedback é obrigatório")
     private String texto;
+
+    // Preenchida automaticamente pelo sistema na criação.
     private LocalDate data;
 
-    @ManyToOne
+    // Estudante e cardápio não vão inteiros no JSON (o estudante tem e-mail e alergias);
+    // saem só os ids, pelos getters abaixo.
+    @JsonIgnore
+    @ManyToOne(optional = false)
     @JoinColumn(name = "estudante_id")
     private Estudante estudante;
 
-    @ManyToOne
+    @JsonIgnore
+    @ManyToOne(optional = false)
     @JoinColumn(name = "menu_id")
     private Menu menu;
 
@@ -33,16 +42,6 @@ public class Feedback implements Serializable {
         this.data = data;
         this.estudante = estudante;
         this.menu = menu;
-    }
-
-    public void Cadastrar(){
-
-    }
-    public void Editar(){
-
-    }
-    public void Excluir(){
-
     }
 
     public Long getId() {
@@ -85,14 +84,25 @@ public class Feedback implements Serializable {
         this.menu = menu;
     }
 
+    @JsonProperty("estudanteId")
+    public Long getEstudanteId() {
+        return estudante != null ? estudante.getId() : null;
+    }
+
+    @JsonProperty("menuId")
+    public Long getMenuId() {
+        return menu != null ? menu.getId() : null;
+    }
+
+    // Só ids no toString: antes imprimia o estudante inteiro e o cardápio.
     @Override
     public String toString() {
         return "Feedback{" +
                 "id=" + id +
                 ", texto='" + texto + '\'' +
                 ", data=" + data +
-                ", estudante=" + estudante +
-                ", menu=" + menu +
+                ", estudanteId=" + getEstudanteId() +
+                ", menuId=" + getMenuId() +
                 '}';
     }
 }

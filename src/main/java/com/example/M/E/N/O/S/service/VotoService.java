@@ -57,7 +57,7 @@ public class VotoService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "A opção " + request.opcaoId() + " não pertence à enquete " + enqueteId));
 
-        if (votoRepository.existsByEstudanteIdAndEnqueteId(estudante.getId(), enqueteId)) {
+        if (votoRepository.existsByEstudante_IdAndEnquete_Id(estudante.getId(), enqueteId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Este estudante já votou nesta enquete");
         }
 

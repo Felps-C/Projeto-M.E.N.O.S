@@ -70,9 +70,9 @@ public class EnqueteService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Escola não encontrada com id: " + escolaId);
         }
         if (ativa == null) {
-            return enqueteRepository.findByEscolaIdOrderByDataInicioDesc(escolaId);
+            return enqueteRepository.findByEscola_IdOrderByDataInicioDesc(escolaId);
         }
-        return enqueteRepository.findByEscolaIdAndAtivaOrderByDataInicioDesc(escolaId, ativa);
+        return enqueteRepository.findByEscola_IdAndAtivaOrderByDataInicioDesc(escolaId, ativa);
     }
 
     @Transactional(readOnly = true)
@@ -100,7 +100,7 @@ public class EnqueteService {
     @Transactional
     public void deletar(Long id) {
         Enquete enquete = buscarPorId(id);
-        if (votoRepository.existsByEnqueteId(id)) {
+        if (votoRepository.existsByEnquete_Id(id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "A enquete já recebeu votos e não pode ser excluída. Feche a enquete em vez disso");
         }
@@ -130,7 +130,7 @@ public class EnqueteService {
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "A opção " + opcaoId + " não pertence à enquete " + enqueteId));
-        if (votoRepository.existsByOpcaoEscolhidaId(opcaoId)) {
+        if (votoRepository.existsByOpcaoEscolhida_Id(opcaoId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "A opção já recebeu votos e não pode ser removida");
         }
