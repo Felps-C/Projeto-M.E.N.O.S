@@ -166,7 +166,12 @@ public class EnqueteService {
 
     @Transactional(readOnly = true)
     public ResultadoEnquete resultado(Long id) {
-        Enquete enquete = buscarPorId(id);
+        return resultado(buscarPorId(id));
+    }
+
+    // Também usado pelo relatório (RelatorioService).
+    @Transactional(readOnly = true)
+    public ResultadoEnquete resultado(Enquete enquete) {
         Map<Long, Long> contagem = enquete.calcularResultado();
         long total = contagem.values().stream().mapToLong(Long::longValue).sum();
 
