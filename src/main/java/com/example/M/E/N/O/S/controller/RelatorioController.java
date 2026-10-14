@@ -1,7 +1,8 @@
 package com.example.M.E.N.O.S.controller;
 
-import com.example.M.E.N.O.S.model.Enquete;
-import com.example.M.E.N.O.S.model.Relatorio;
+import com.example.M.E.N.O.S.dto.RelatorioRequest;
+import com.example.M.E.N.O.S.dto.RelatorioResponse;
+import com.example.M.E.N.O.S.dto.ResultadoEnquete;
 import com.example.M.E.N.O.S.service.RelatorioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,49 +19,33 @@ public class RelatorioController {
         this.relatorioService = relatorioService;
     }
 
-    @GetMapping
-    public List<Relatorio> listar() {
-        return relatorioService.listarTodos();
+    // Escola gera um relatório. O corpo é opcional (só o período); os números o servidor calcula.
+    @PostMapping("/escola/{escolaId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public RelatorioResponse gerar(@PathVariable Long escolaId,
+                                   @RequestBody(required = false) RelatorioRequest request) {
+        return relatorioService.gerar(escolaId, request);
+    }
+
+    @GetMapping("/escola/{escolaId}")
+    public List<RelatorioResponse> listarPorEscola(@PathVariable Long escolaId) {
+        return relatorioService.listarPorEscola(escolaId);
     }
 
     @GetMapping("/{id}")
-    public Relatorio buscarPorId(@PathVariable Long id) {
+    public RelatorioResponse buscarPorId(@PathVariable Long id) {
         return relatorioService.buscarPorId(id);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Relatorio criar(@RequestBody Relatorio relatorio) {
-        return relatorioService.salvar(relatorio);
-    }
-
-    @PutMapping("/{id}")
-    public Relatorio atualizar(
-            @PathVariable Long id,
-            @RequestBody Relatorio relatorio) {
-
-        return relatorioService.atualizar(id, relatorio);
+    // Use ?status=ativa ou ?status=inativa.
+    @GetMapping("/{id}/enquetes")
+    public List<ResultadoEnquete> filtrarStatus(@PathVariable Long id, @RequestParam String status) {
+        return relatorioService.filtrarStatus(id, status);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletar(@PathVariable Long id) {
         relatorioService.deletar(id);
-    }
-
-    @PostMapping("/compilar")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Relatorio compilarDados(
-            @RequestBody List<Enquete> enquetes) {
-
-        return relatorioService.compilarDados(enquetes);
-    }
-
-    @GetMapping("/{id}/enquetes")
-    public List<Enquete> filtrarStatus(
-            @PathVariable Long id,
-            @RequestParam String status) {
-
-        return relatorioService.filtrarStatus(id, status);
     }
 }

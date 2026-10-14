@@ -9,44 +9,62 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+// Relatório consolidado de uma escola. Quem calcula os números é o servidor
+// (compilarDados), nunca o cliente: por isso não há setters para totalEnquete,
+// totalVotos nem mediaVotos.
 @Entity
-@Table( name = "Relatorios")
-
+@Table(name = "Relatorios")
 public class Relatorio implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
+
     private Date dataGeracao;
     private LocalDateTime dataInicio;
     private LocalDateTime dataFim;
     private int totalEnquete;
+    private long totalVotos;
     private double mediaVotos;
 
-    @OneToMany
+    // Escola dona do relatório.
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "escola_id")
+    private Escola escola;
+
+    // @ManyToMany: a mesma enquete pode aparecer em vários relatórios.
+    // Com @OneToMany o Hibernate cria uma restrição UNIQUE em enquetes_id, e o segundo
+    // relatório com a mesma enquete falhava. O nome da tabela é explícito de propósito:
+    // o nome padrão antigo ("Relatorios_Enquetes") já tem essa restrição em bancos existentes.
+    @ManyToMany
+    @JoinTable(name = "relatorio_enquete",
+            joinColumns = @JoinColumn(name = "relatorio_id"),
+            inverseJoinColumns = @JoinColumn(name = "enquete_id"))
+    @OrderBy("dataInicio DESC")
     private List<Enquete> enquetes = new ArrayList<>();
 
     public Relatorio() {
     }
 
-    public Relatorio(Long id, Date dataGeracao, LocalDateTime dataInicio, LocalDateTime dataFim, int totalEnquete, double mediaVotos, List<Enquete> enquetes) {
-        this.id = id;
-        this.dataGeracao = dataGeracao;
-        this.dataInicio = dataInicio;
-        this.dataFim = dataFim;
-        this.totalEnquete = totalEnquete;
-        this.mediaVotos = mediaVotos;
-        this.enquetes = enquetes;
-    }
-
-    public void CompilarDados(List<Enquete> enquetes){
-        this.enquetes = enquetes;
+    // Recebe as enquetes (já lidas do banco) e calcula os totais.
+    // mediaVotos = votos por enquete (totalVotos / totalEnquete), com 1 casa decimal.
+    public void compilarDados(List<Enquete> enquetes) {
+        this.enquetes = new ArrayList<>(enquetes);
         this.totalEnquete = enquetes.size();
+
+        long votos = 0;
+        for (Enquete enquete : enquetes) {
+            for (Long votosDaOpcao : enquete.calcularResultado().values()) {
+                votos += votosDaOpcao;
+            }
+        }
+        this.totalVotos = votos;
+        this.mediaVotos = totalEnquete == 0 ? 0.0 : Math.round(votos * 10.0 / totalEnquete) / 10.0;
         this.dataGeracao = new Date();
     }
 
-    public List<Enquete> FiltrarStatus(String status) {
+    // status: "ativa" ou "inativa" (campo "ativa" da enquete).
+    public List<Enquete> filtrarStatus(String status) {
         List<Enquete> resultado = new ArrayList<>();
         for (Enquete enquete : enquetes) {
             if (status.equalsIgnoreCase("ativa") && Boolean.TRUE.equals(enquete.getAtiva())) {
@@ -58,76 +76,74 @@ public class Relatorio implements Serializable {
         return resultado;
     }
 
-    public File Exportar () {
-        return null;
+    // RF15 (PDF/Excel): será implementado com OpenPDF/Apache POI.
+    public File exportar() {
+        throw new UnsupportedOperationException("Exportação do relatório ainda não implementada (RF15)");
     }
 
-    public Long getId () {
+    public Long getId() {
         return id;
     }
 
-    public void setId (Long id){
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public Date getDataGeracao () {
+    public Date getDataGeracao() {
         return dataGeracao;
     }
 
-    public void setDataGeracao (Date dataGeracao){
-        this.dataGeracao = dataGeracao;
-    }
-
-    public LocalDateTime getDataInicio () {
+    public LocalDateTime getDataInicio() {
         return dataInicio;
     }
 
-    public void setDataInicio (LocalDateTime dataInicio){
+    public void setDataInicio(LocalDateTime dataInicio) {
         this.dataInicio = dataInicio;
     }
 
-    public LocalDateTime getDataFim () {
+    public LocalDateTime getDataFim() {
         return dataFim;
     }
 
-    public void setDataFim (LocalDateTime dataFim){
+    public void setDataFim(LocalDateTime dataFim) {
         this.dataFim = dataFim;
     }
 
-    public int getTotalEnquete () {
+    public int getTotalEnquete() {
         return totalEnquete;
     }
 
-    public void setTotalEnquete ( int totalEnquete){
-        this.totalEnquete = totalEnquete;
+    public long getTotalVotos() {
+        return totalVotos;
     }
 
-    public double getMediaVotos () {
+    public double getMediaVotos() {
         return mediaVotos;
     }
 
-    public void setMediaVotos ( double mediaVotos){
-        this.mediaVotos = mediaVotos;
+    public Escola getEscola() {
+        return escola;
     }
 
-    public List<Enquete> getEnquetes () {
+    public void setEscola(Escola escola) {
+        this.escola = escola;
+    }
+
+    public List<Enquete> getEnquetes() {
         return enquetes;
-    }
-
-    public void setEnquetes (List < Enquete > enquetes) {
-        this.enquetes = enquetes;
     }
 
     @Override
     public String toString() {
         return "Relatorio{" +
                 "id=" + id +
+                ", escolaId=" + (escola != null ? escola.getId() : null) +
                 ", dataGeracao=" + dataGeracao +
                 ", dataInicio=" + dataInicio +
                 ", dataFim=" + dataFim +
                 ", totalEnquete=" + totalEnquete +
+                ", totalVotos=" + totalVotos +
                 ", mediaVotos=" + mediaVotos +
-                ", enquetes=" + enquetes +
                 '}';
     }
 }
