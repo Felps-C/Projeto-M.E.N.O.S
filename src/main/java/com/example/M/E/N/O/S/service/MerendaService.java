@@ -1,7 +1,9 @@
 package com.example.M.E.N.O.S.service;
 
+import com.example.M.E.N.O.S.model.Escola;
 import com.example.M.E.N.O.S.model.Menu;
 import com.example.M.E.N.O.S.model.Merenda;
+import com.example.M.E.N.O.S.repository.EscolaRepository;
 import com.example.M.E.N.O.S.repository.MerendaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,10 +19,12 @@ import java.util.List;
 public class MerendaService {
 
     private final MerendaRepository merendaRepository;
+    private final EscolaRepository escolaRepository;
 
     // Injeção de dependência via construtor
-    public MerendaService(MerendaRepository merendaRepository) {
+    public MerendaService(MerendaRepository merendaRepository, EscolaRepository escolaRepository) {
         this.merendaRepository = merendaRepository;
+        this.escolaRepository = escolaRepository;
     }
 
     public List<Merenda> listarTodos() {
@@ -33,16 +37,40 @@ public class MerendaService {
                         HttpStatus.NOT_FOUND, "Merenda não encontrada com id: " + id));
     }
 
+    // Pratos de uma escola (é o que a tela de cardápio usa).
+    @Transactional(readOnly = true)
+    public List<Merenda> listarPorEscola(Long escolaId) {
+        buscarEscola(escolaId); // garante o 404 se a escola não existir
+        return merendaRepository.findByEscola_IdOrderByNomeAsc(escolaId);
+    }
+
+    // Cadastra um prato já ligado à escola. A foto é enviada depois, em /merendas/{id}/imagem.
+    @Transactional
+    public Merenda criarParaEscola(Long escolaId, Merenda merenda) {
+        Escola escola = buscarEscola(escolaId);
+        merenda.setId(null);
+        merenda.setEscola(escola);
+        return merendaRepository.save(merenda);
+    }
+
+    private Escola buscarEscola(Long escolaId) {
+        return escolaRepository.findById(escolaId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Escola não encontrada com id: " + escolaId));
+    }
+
     public Merenda salvar(Merenda merenda) {
         merenda.setId(null); // garante que o POST sempre cria um registro novo
         return merendaRepository.save(merenda);
     }
 
-    // Atualiza só nome e quantidade; a imagem é alterada pelo endpoint próprio.
+    // Atualiza nome, descrição, tipo de refeição e quantidade; a imagem é alterada pelo endpoint próprio.
     public Merenda atualizar(Long id, Merenda dadosAtualizados) {
         Merenda merenda = buscarPorId(id);
         merenda.setNome(dadosAtualizados.getNome());
         merenda.setQuantidade(dadosAtualizados.getQuantidade());
+        merenda.setDescricao(dadosAtualizados.getDescricao());
+        merenda.setTipoRefeicao(dadosAtualizados.getTipoRefeicao());
         return merendaRepository.save(merenda);
     }
 

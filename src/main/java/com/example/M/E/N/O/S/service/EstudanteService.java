@@ -18,12 +18,15 @@ public class EstudanteService {
 
     private final EstudanteRepository estudanteRepository;
     private final EscolaRepository escolaRepository;
+    private final SenhaService senhaService;
 
     // Injeção de dependência via construtor (forma recomendada no Spring)
     public EstudanteService(EstudanteRepository estudanteRepository,
-                            EscolaRepository escolaRepository) {
+                            EscolaRepository escolaRepository,
+                            SenhaService senhaService) {
         this.estudanteRepository = estudanteRepository;
         this.escolaRepository = escolaRepository;
+        this.senhaService = senhaService;
     }
 
     // Sem filtro lista todos; com escolaId lista só os estudantes daquela escola.
@@ -62,7 +65,7 @@ public class EstudanteService {
         Estudante estudante = new Estudante();
         estudante.setNome(request.nome());
         estudante.setEmail(request.email());
-        estudante.setSenha(request.senha());
+        estudante.setSenha(senhaService.gerarHash(request.senha()));
         estudante.setMatriculaEscolar(request.matriculaEscolar());
         estudante.setAlergias(request.alergias());
         estudante.setEscola(escola);
@@ -94,7 +97,7 @@ public class EstudanteService {
         estudante.setEscola(escola);
         // Só troca a senha se uma nova foi enviada.
         if (request.senha() != null && !request.senha().isBlank()) {
-            estudante.setSenha(request.senha());
+            estudante.setSenha(senhaService.gerarHash(request.senha()));
         }
         return estudanteRepository.save(estudante);
     }

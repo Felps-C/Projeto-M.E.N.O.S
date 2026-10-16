@@ -34,6 +34,13 @@ public class Enquete implements Serializable {
     @JoinColumn(name = "escola_id")
     private Escola escola;
 
+    // Prato (merenda) sobre o qual a enquete pergunta. Opcional.
+    // Não vai inteiro no JSON; só "merendaId" e "merendaNome" (o card do aluno mostra o prato).
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "merenda_id")
+    private Merenda merenda;
+
     @OneToMany(mappedBy = "enquete", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
     private List<OpcaoVoto> opcoes = new ArrayList<>();
@@ -144,6 +151,24 @@ public class Enquete implements Serializable {
     @JsonProperty("escolaId")
     public Long getEscolaId() {
         return escola != null ? escola.getId() : null;
+    }
+
+    public Merenda getMerenda() {
+        return merenda;
+    }
+
+    public void setMerenda(Merenda merenda) {
+        this.merenda = merenda;
+    }
+
+    @JsonProperty("merendaId")
+    public Long getMerendaId() {
+        return merenda != null ? merenda.getId() : null;
+    }
+
+    @JsonProperty("merendaNome")
+    public String getMerendaNome() {
+        return merenda != null ? merenda.getNome() : null;
     }
 
     public List<OpcaoVoto> getOpcoes() {

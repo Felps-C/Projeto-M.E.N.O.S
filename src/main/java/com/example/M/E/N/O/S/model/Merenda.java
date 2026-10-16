@@ -1,9 +1,11 @@
 package com.example.M.E.N.O.S.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,20 @@ public class Merenda {
 
     @PositiveOrZero(message = "A quantidade não pode ser negativa")
     private int quantidade;
+
+    // Descrição do prato (ex.: "Arroz, feijão e frango assado") e tipo da refeição (ex.: "Almoço"). Opcionais.
+    @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres")
+    private String descricao;
+
+    @Size(max = 40, message = "O tipo de refeição deve ter no máximo 40 caracteres")
+    private String tipoRefeicao;
+
+    // Escola dona do prato. Pratos antigos (criados antes) ficam sem escola e valem para todas.
+    // Não vai inteira no JSON; só o "escolaId", pelo getter abaixo.
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "escola_id")
+    private Escola escola;
 
     // @JsonIgnore evita loop infinito no JSON (Merenda -> Menu -> Merenda -> ...)
     @JsonIgnore
@@ -92,6 +108,35 @@ public class Merenda {
 
     public void setMenus(List<Menu> menus) {
         this.menus = menus;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getTipoRefeicao() {
+        return tipoRefeicao;
+    }
+
+    public void setTipoRefeicao(String tipoRefeicao) {
+        this.tipoRefeicao = tipoRefeicao;
+    }
+
+    public Escola getEscola() {
+        return escola;
+    }
+
+    public void setEscola(Escola escola) {
+        this.escola = escola;
+    }
+
+    @JsonProperty("escolaId")
+    public Long getEscolaId() {
+        return escola != null ? escola.getId() : null;
     }
 
     // toString sem "menus" e sem "imagem" para não gerar StackOverflowError

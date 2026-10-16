@@ -15,10 +15,12 @@ import java.util.List;
 public class EscolaService {
 
     private final EscolaRepository escolaRepository;
+    private final SenhaService senhaService;
 
     // Injeção de dependência via construtor (forma recomendada no Spring)
-    public EscolaService(EscolaRepository escolaRepository) {
+    public EscolaService(EscolaRepository escolaRepository, SenhaService senhaService) {
         this.escolaRepository = escolaRepository;
+        this.senhaService = senhaService;
     }
 
     public List<Escola> listarTodos() {
@@ -39,10 +41,11 @@ public class EscolaService {
         escolaRepository.findByEmail(request.email()).ifPresent(outra -> {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe uma escola com este e-mail");
         });
-        escolaRepository.findByCnpj(request.cnpj()).ifPresent(outra -> {
+        if (!escolaRepository.findAllByCnpj(request.cnpj()).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe uma escola com este CNPJ");
-        });
-        Escola escola = new Escola(request.nome(), request.email(), request.senha(), request.cnpj());
+        }
+        Escola escola = new Escola(request.nome(), request.email(),
+                senhaService.gerarHash(request.senha()), request.cnpj());
         return escolaRepository.save(escola);
     }
 
@@ -56,18 +59,18 @@ public class EscolaService {
                 .ifPresent(outra -> {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe uma escola com este e-mail");
                 });
-        escolaRepository.findByCnpj(request.cnpj())
-                .filter(outra -> !outra.getId().equals(id))
-                .ifPresent(outra -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe uma escola com este CNPJ");
-                });
+        boolean cnpjDeOutra = escolaRepository.findAllByCnpj(request.cnpj()).stream()
+                .anyMatch(outra -> !outra.getId().equals(id));
+        if (cnpjDeOutra) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe uma escola com este CNPJ");
+        }
 
         escola.setNome(request.nome());
         escola.setEmail(request.email());
         escola.setCnpj(request.cnpj());
         // Só troca a senha se uma nova foi enviada.
         if (request.senha() != null && !request.senha().isBlank()) {
-            escola.setSenha(request.senha());
+            escola.setSenha(senhaService.gerarHash(request.senha()));
         }
         return escolaRepository.save(escola);
     }

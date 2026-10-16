@@ -6,9 +6,11 @@ import com.example.M.E.N.O.S.dto.OpcaoRequest;
 import com.example.M.E.N.O.S.dto.ResultadoEnquete;
 import com.example.M.E.N.O.S.model.Enquete;
 import com.example.M.E.N.O.S.model.Escola;
+import com.example.M.E.N.O.S.model.Merenda;
 import com.example.M.E.N.O.S.model.OpcaoVoto;
 import com.example.M.E.N.O.S.repository.EnqueteRepository;
 import com.example.M.E.N.O.S.repository.EscolaRepository;
+import com.example.M.E.N.O.S.repository.MerendaRepository;
 import com.example.M.E.N.O.S.repository.VotoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,14 +27,17 @@ public class EnqueteService {
     private final EnqueteRepository enqueteRepository;
     private final EscolaRepository escolaRepository;
     private final VotoRepository votoRepository;
+    private final MerendaRepository merendaRepository;
 
     // Injeção de dependência via construtor
     public EnqueteService(EnqueteRepository enqueteRepository,
                           EscolaRepository escolaRepository,
-                          VotoRepository votoRepository) {
+                          VotoRepository votoRepository,
+                          MerendaRepository merendaRepository) {
         this.enqueteRepository = enqueteRepository;
         this.escolaRepository = escolaRepository;
         this.votoRepository = votoRepository;
+        this.merendaRepository = merendaRepository;
     }
 
     // ---------- Enquete ----------
@@ -54,6 +59,7 @@ public class EnqueteService {
 
         Enquete enquete = new Enquete();
         enquete.setEscola(escola);
+        enquete.setMerenda(buscarPrato(request.merendaId(), escola.getId()));
         enquete.setTitulo(request.titulo());
         enquete.setDescricao(request.descricao());
         enquete.setDataInicio(inicio);
@@ -92,6 +98,9 @@ public class EnqueteService {
         enquete.setDescricao(request.descricao());
         enquete.setDataInicio(inicio);
         enquete.setDataFim(request.dataFim());
+        if (request.merendaId() != null) {
+            enquete.setMerenda(buscarPrato(request.merendaId(), enquete.getEscola().getId()));
+        }
         return enqueteRepository.save(enquete);
     }
 
@@ -187,6 +196,22 @@ public class EnqueteService {
     }
 
     // ---------- auxiliar ----------
+
+    // O prato vinculado precisa existir e ser da mesma escola da enquete.
+    // (Pratos antigos, criados sem escola, valem para todas.) Sem merendaId, a enquete fica sem prato.
+    private Merenda buscarPrato(Long merendaId, Long escolaId) {
+        if (merendaId == null) {
+            return null;
+        }
+        Merenda merenda = merendaRepository.findById(merendaId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Merenda não encontrada com id: " + merendaId));
+        if (merenda.getEscola() != null && !merenda.getEscola().getId().equals(escolaId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "A merenda pertence a outra escola");
+        }
+        return merenda;
+    }
+
 
     private void validarPeriodo(LocalDateTime inicio, LocalDateTime fim) {
         if (fim != null && inicio != null && !fim.isAfter(inicio)) {

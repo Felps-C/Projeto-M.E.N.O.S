@@ -97,8 +97,13 @@ public class EstoqueService {
         if (quantidade <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantidade deve ser maior que zero");
         }
+        // Trava o produto ANTES de ler o saldo. Assim duas saídas simultâneas não passam juntas
+        // pela checagem "tem saldo?" (a segunda espera a primeira terminar).
+        Produto produto = produtoRepository.buscarParaAtualizar(produtoId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Produto não encontrado com id: " + produtoId));
         Estoque estoque = buscarPorId(estoqueId);
-        Produto produto = produtoDoEstoque(estoque, produtoId);
+        produtoDoEstoque(estoque, produtoId); // confere que o produto é deste estoque
 
         if (tipo == TipoMovimentacao.SAIDA) {
             if (produto.getQuantidade() < quantidade) {

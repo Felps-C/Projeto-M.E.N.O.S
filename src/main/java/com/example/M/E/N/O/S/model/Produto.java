@@ -3,6 +3,7 @@ package com.example.M.E.N.O.S.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -25,6 +26,13 @@ public class Produto implements Serializable {
     // Quantidade mínima desejada em estoque (RF08). 0 = alerta desativado.
     @PositiveOrZero(message = "O estoque mínimo não pode ser negativo")
     private int estoqueMinimo;
+
+    // Categoria (ex.: Grãos, Proteína) e unidade de medida (ex.: kg, L). Opcionais.
+    @Size(max = 60, message = "A categoria deve ter no máximo 60 caracteres")
+    private String categoria;
+
+    @Size(max = 20, message = "A unidade deve ter no máximo 20 caracteres")
+    private String unidade;
 
     public Produto(){
     }
@@ -76,6 +84,22 @@ public class Produto implements Serializable {
         this.estoqueMinimo = estoqueMinimo;
     }
 
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
+    }
+
+    public String getUnidade() {
+        return unidade;
+    }
+
+    public void setUnidade(String unidade) {
+        this.unidade = unidade;
+    }
+
     @Override
     public String toString() {
         return "Produto{" +
@@ -84,6 +108,8 @@ public class Produto implements Serializable {
                 ", validade=" + validade +
                 ", quantidade=" + quantidade +
                 ", estoqueMinimo=" + estoqueMinimo +
+                ", categoria='" + categoria + '\'' +
+                ", unidade='" + unidade + '\'' +
                 '}';
     }
 }

@@ -1,0 +1,26 @@
+package com.example.M.E.N.O.S.controller;
+
+import com.example.M.E.N.O.S.dto.LoginRequest;
+import com.example.M.E.N.O.S.dto.LoginResponse;
+import com.example.M.E.N.O.S.service.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class AuthController {
+
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    // Login de escola (CNPJ ou e-mail) e de aluno (matrícula ou e-mail).
+    // Devolve { tipo, id, escolaId, nome }. Ainda não gera token (os demais endpoints continuam abertos).
+    @PostMapping("/login")
+    public LoginResponse entrar(@Valid @RequestBody LoginRequest request) {
+        return authService.entrar(request);
+    }
+}

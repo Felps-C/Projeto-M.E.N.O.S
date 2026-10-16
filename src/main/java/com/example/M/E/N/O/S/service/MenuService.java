@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -45,17 +46,21 @@ public class MenuService {
         return menuRepository.save(menu);
     }
 
-    // Lista os cardápios de uma escola. Com ?ativa=true devolve só os publicados
-    // (é o que o aluno enxerga).
+    // Lista os cardápios de uma escola. Filtros opcionais:
+    //   ?ativa=true      -> só os publicados (é o que o aluno enxerga)
+    //   ?data=2026-10-14 -> só os cardápios dessa data (ex.: o "cardápio de hoje")
     @Transactional(readOnly = true)
-    public List<Menu> listarPorEscola(Long escolaId, Boolean ativa) {
+    public List<Menu> listarPorEscola(Long escolaId, Boolean ativa, LocalDate data) {
         if (!escolaRepository.existsById(escolaId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Escola não encontrada com id: " + escolaId);
         }
-        if (ativa == null) {
-            return menuRepository.findByEscola_IdOrderByDataInicioDesc(escolaId);
+        List<Menu> menus = ativa == null
+                ? menuRepository.findByEscola_IdOrderByDataInicioDesc(escolaId)
+                : menuRepository.findByEscola_IdAndAtivaOrderByDataInicioDesc(escolaId, ativa);
+        if (data == null) {
+            return menus;
         }
-        return menuRepository.findByEscola_IdAndAtivaOrderByDataInicioDesc(escolaId, ativa);
+        return menus.stream().filter(menu -> data.equals(menu.getDataInicio())).toList();
     }
 
     @Transactional(readOnly = true)
@@ -79,6 +84,7 @@ public class MenuService {
         Merenda merenda = merendaRepository.findById(merendaId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Merenda não encontrada com id: " + merendaId));
+        validarMesmaEscola(merenda, menu.getEscola().getId());
         boolean jaEstaNoCardapio = menu.getMerendas().stream().anyMatch(m -> m.getId().equals(merendaId));
         if (!jaEstaNoCardapio) {
             menu.getMerendas().add(merenda);
@@ -118,6 +124,9 @@ public class MenuService {
 
     private void aplicar(Menu menu, MenuRequest request) {
         List<Merenda> merendas = buscarMerendas(request.merendaIds());
+        for (Merenda merenda : merendas) {
+            validarMesmaEscola(merenda, menu.getEscola().getId());
+        }
         boolean ativa = request.ativa() == null || request.ativa();
         if (ativa && merendas.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -126,6 +135,15 @@ public class MenuService {
         menu.setDataInicio(request.dataInicio());
         menu.setAtiva(ativa);
         menu.setMerendas(merendas);
+    }
+
+    // Um prato cadastrado por uma escola só entra nos cardápios dessa escola.
+    // (Pratos antigos, criados sem escola, continuam valendo para todas.)
+    private void validarMesmaEscola(Merenda merenda, Long escolaId) {
+        if (merenda.getEscola() != null && !merenda.getEscola().getId().equals(escolaId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "A merenda " + merenda.getId() + " pertence a outra escola");
+        }
     }
 
     private List<Merenda> buscarMerendas(List<Long> ids) {

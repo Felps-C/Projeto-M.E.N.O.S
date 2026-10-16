@@ -26,6 +26,19 @@ public class MerendaController {
         return merendaService.listarTodos();
     }
 
+    // Pratos de uma escola (é o que a tela de cardápio usa)
+    @GetMapping("/escola/{escolaId}")
+    public List<Merenda> listarPorEscola(@PathVariable Long escolaId) {
+        return merendaService.listarPorEscola(escolaId);
+    }
+
+    // Cadastra um prato para a escola. Depois, envie a foto em POST /merendas/{id}/imagem.
+    @PostMapping("/escola/{escolaId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Merenda criarParaEscola(@PathVariable Long escolaId, @Valid @RequestBody Merenda merenda) {
+        return merendaService.criarParaEscola(escolaId, merenda);
+    }
+
     @GetMapping("/{id}")
     public Merenda buscarPorId(@PathVariable Long id) {
         return merendaService.buscarPorId(id);

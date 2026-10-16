@@ -12,6 +12,9 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     // O "_" diz ao Spring Data para entrar na relação (menu -> id).
     List<Feedback> findByMenu_IdOrderByDataDescIdDesc(Long menuId);
 
+    // Total de comentários de um cardápio.
+    long countByMenu_Id(Long menuId);
+
     // menu -> escola -> id: feedbacks de todos os cardápios de uma escola.
     List<Feedback> findByMenu_Escola_IdOrderByDataDescIdDesc(Long escolaId);
 }

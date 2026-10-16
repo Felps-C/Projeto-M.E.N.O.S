@@ -39,8 +39,12 @@ public class ProdutoService {
         Produto produto = buscarPorId(id);
         produto.setNome(dadosAtualizados.getNome());
         produto.setValidade(dadosAtualizados.getValidade());
-        produto.setQuantidade(dadosAtualizados.getQuantidade());
         produto.setEstoqueMinimo(dadosAtualizados.getEstoqueMinimo());
+        produto.setCategoria(dadosAtualizados.getCategoria());
+        produto.setUnidade(dadosAtualizados.getUnidade());
+        // A quantidade NÃO é alterada aqui, de propósito: ela só muda por entrada/saída
+        // (POST /estoques/{id}/produtos/{produtoId}/entrada|saida), assim o histórico de
+        // movimentações sempre bate com o saldo.
         return produtoRepository.save(produto);
     }
 

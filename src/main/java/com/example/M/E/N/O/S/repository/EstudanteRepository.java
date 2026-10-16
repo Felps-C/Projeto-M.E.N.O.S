@@ -13,5 +13,8 @@ public interface EstudanteRepository extends JpaRepository<Estudante, Long> {
     // A matrícula só precisa ser única dentro da mesma escola.
     Optional<Estudante> findByEscola_IdAndMatriculaEscolar(Long escolaId, String matriculaEscolar);
 
+    // Usado no login: a mesma matrícula pode existir em escolas diferentes.
+    List<Estudante> findByMatriculaEscolar(String matriculaEscolar);
+
     List<Estudante> findByEscola_Id(Long escolaId);
 }
